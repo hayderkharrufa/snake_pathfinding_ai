@@ -32,7 +32,6 @@ def play():
         snake.update()
 
         if snake.is_dead:
-            print("SCORE: {}".format(snake.score))
             snake.reset()
 
         clock.tick(FPS)

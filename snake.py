@@ -81,7 +81,25 @@ class Snake:
         for sqr in self.squares[1:]:
             sqr.draw()
 
-    def set_direction(self):
+    def set_direction(self, direction):
+        if direction == 'left':
+            if not self.dir == [1, 0]:
+                self.dir = [-1, 0]
+                self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
+        if direction == "right":
+            if not self.dir == [-1, 0]:
+                self.dir = [1, 0]
+                self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
+        if direction == "up":
+            if not self.dir == [0, 1]:
+                self.dir = [0, -1]
+                self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
+        if direction == "down":
+            if not self.dir == [0, -1]:
+                self.dir = [0, 1]
+                self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
+
+    def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -90,24 +108,16 @@ class Snake:
 
             for _ in keys:
                 if keys[pygame.K_LEFT]:
-                    if not self.dir == [1, 0]:
-                        self.dir = [-1, 0]
-                        self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
+                    self.set_direction('left')
 
                 elif keys[pygame.K_RIGHT]:
-                    if not self.dir == [-1, 0]:
-                        self.dir = [1, 0]
-                        self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
+                    self.set_direction('right')
 
                 elif keys[pygame.K_UP]:
-                    if not self.dir == [0, 1]:
-                        self.dir = [0, -1]
-                        self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
+                    self.set_direction('up')
 
                 elif keys[pygame.K_DOWN]:
-                    if not self.dir == [0, -1]:
-                        self.dir = [0, 1]
-                        self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
+                    self.set_direction('down')
 
     def move(self):
         for j, sqr in enumerate(self.squares):
@@ -291,7 +301,7 @@ class Snake:
             self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
 
     def update(self):
-        self.set_direction()
+        self.handle_events()
         self.draw()
         self.move()
 
