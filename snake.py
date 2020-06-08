@@ -300,8 +300,27 @@ class Snake:
             self.dir = [1, 0]
             self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
 
+    def go_to(self, position):
+        if self.head.pos[0] > position[0]:
+            self.set_direction('left')
+        if self.head.pos[0] < position[0]:
+            self.set_direction('right')
+        if self.head.pos[1] > position[1]:
+            self.set_direction('up')
+        if self.head.pos[1] < position[1]:
+            self.set_direction('down')
+
+    def is_position_free(self, position):
+        for sqr in self.squares:
+            if sqr.pos == position:
+                return False
+        return True
+
     def update(self):
         self.handle_events()
+
+        # self.go_to(self.apple.pos)
+        print(self.is_position_free([1, 1]))
         self.draw()
         self.move()
 
