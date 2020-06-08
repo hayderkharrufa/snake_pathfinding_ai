@@ -311,16 +311,34 @@ class Snake:
             self.set_direction('down')
 
     def is_position_free(self, position):
+        if position[0] >= ROWS or position[0] < 0 or position[1] >= ROWS or position[1] < 0:
+            return False
         for sqr in self.squares:
             if sqr.pos == position:
                 return False
         return True
 
+    def is_move_possible(self, move):
+        if move == 'left':
+            if self.is_position_free([self.head.pos[0] - 1, self.head.pos[1]]):
+                return True
+            return False
+        if move == 'right':
+            if self.is_position_free([self.head.pos[0] + 1, self.head.pos[1]]):
+                return True
+            return False
+        if move == 'up':
+            if self.is_position_free([self.head.pos[0], self.head.pos[1] - 1]):
+                return True
+            return False
+        if move == 'down':
+            if self.is_position_free([self.head.pos[0], self.head.pos[1] + 1]):
+                return True
+            return False
+
     def update(self):
         self.handle_events()
 
-        # self.go_to(self.apple.pos)
-        print(self.is_position_free([1, 1]))
         self.draw()
         self.move()
 
