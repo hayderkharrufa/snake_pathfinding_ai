@@ -13,7 +13,7 @@ APPLE_CLR = (255, 255, 0)
 HEAD_CLR = (0, 150, 0)
 
 # Game Settings
-FPS = 300
+FPS = 60
 INITIAL_SNAKE_LENGTH = 4
 
 # Variables used is BFS algorithm

@@ -75,8 +75,7 @@ class Snake:
         self.tail = self.squares[-1]
         self.tail.is_tail = True
 
-        self.path = self.move_with_bfs()
-
+        self.path = self.bfs()
 
     def draw(self):
         self.apple.draw(APPLE_CLR)
@@ -174,7 +173,7 @@ class Snake:
         if self.head.pos == self.apple.pos:
             self.generate_apple()
             self.moves_without_eating = 0
-            self.path = self.move_with_bfs()
+            self.path = self.bfs()
             return True
 
     def is_right_blocked(self):
@@ -340,7 +339,7 @@ class Snake:
                 return True
             return False
 
-    def move_with_bfs(self):  # Breadth First Search Algorithm
+    def bfs(self):  # Breadth First Search Algorithm
         s = tuple(self.head.pos)
         e = tuple(self.apple.pos)
 
@@ -352,33 +351,38 @@ class Snake:
         while not len(q) == 0:
             node = q.pop(0)
             neighbors = adjacency_dict[node]
-            for next in neighbors:
-                if self.is_position_free(next) and not visited[tuple(next)]:
-                    q.append(tuple(next))
-                    visited[tuple(next)] = True
-                    prev[tuple(next)] = node
+            for next_node in neighbors:
+                if self.is_position_free(next_node) and not visited[tuple(next_node)]:
+                    q.append(tuple(next_node))
+                    visited[tuple(next_node)] = True
+                    prev[tuple(next_node)] = node
 
         path = list()
 
         found = False
         p_node = e
         while not found:
-            if p_node == None:
-                pass
+            if p_node is None:
+                return []
+
             p_node = prev[p_node]
-            path.insert(0, p_node)
             if p_node == s:
                 path.append(e)
                 return path
-        return []
+
+            path.insert(0, p_node)
+
+    def move_with_dfs(self):
+        pass
 
     def update(self):
         self.handle_events()
         # self.set_direction()
 
-        print(self.head.pos)
-        self.go_to(self.path[1])
-        self.path.pop(1)
+        # print(self.head.pos)
+        if not self.path == []:
+            self.go_to(self.path[0])
+            self.path.pop(0)
 
         self.draw()
         self.move()
