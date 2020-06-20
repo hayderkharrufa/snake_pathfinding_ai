@@ -75,6 +75,9 @@ class Snake:
         self.tail = self.squares[-1]
         self.tail.is_tail = True
 
+        self.path = self.move_with_bfs()
+
+
     def draw(self):
         self.apple.draw(APPLE_CLR)
         self.head.draw(HEAD_CLR)
@@ -171,6 +174,7 @@ class Snake:
         if self.head.pos == self.apple.pos:
             self.generate_apple()
             self.moves_without_eating = 0
+            self.path = self.move_with_bfs()
             return True
 
     def is_right_blocked(self):
@@ -336,8 +340,45 @@ class Snake:
                 return True
             return False
 
+    def move_with_bfs(self):  # Breadth First Search Algorithm
+        s = tuple(self.head.pos)
+        e = tuple(self.apple.pos)
+
+        q = list()  # Queue
+        q.append(s)
+        visited = {tuple(pos): False for pos in grid}
+        visited[s] = True
+        prev = {tuple(pos): None for pos in grid}
+        while not len(q) == 0:
+            node = q.pop(0)
+            neighbors = adjacency_dict[node]
+            for next in neighbors:
+                if self.is_position_free(next) and not visited[tuple(next)]:
+                    q.append(tuple(next))
+                    visited[tuple(next)] = True
+                    prev[tuple(next)] = node
+
+        path = list()
+
+        found = False
+        p_node = e
+        while not found:
+            if p_node == None:
+                pass
+            p_node = prev[p_node]
+            path.insert(0, p_node)
+            if p_node == s:
+                path.append(e)
+                return path
+        return []
+
     def update(self):
         self.handle_events()
+        # self.set_direction()
+
+        print(self.head.pos)
+        self.go_to(self.path[1])
+        self.path.pop(1)
 
         self.draw()
         self.move()
