@@ -1,7 +1,7 @@
 # Dimensions
 WIDTH = 600
 HEIGHT = 600
-ROWS = 30
+ROWS = 20
 SQUARE_SIZE = WIDTH // ROWS
 GAP_SIZE = 1    # Gap between adjacent squares
 
@@ -13,10 +13,10 @@ APPLE_CLR = (255, 255, 0)
 HEAD_CLR = (0, 150, 0)
 
 # Game Settings
-FPS = 60
-INITIAL_SNAKE_LENGTH = 4
+FPS = 30
+INITIAL_SNAKE_LENGTH = 3
 
-# Variables used is BFS algorithm
+# Variables used in BFS algorithm
 n_nodes = ROWS * ROWS
 grid = [[i, j] for i in range(ROWS) for j in range(ROWS)]
 
