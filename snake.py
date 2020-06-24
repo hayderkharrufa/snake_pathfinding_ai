@@ -77,15 +77,19 @@ class Snake:
         self.tail = self.squares[-1]
         self.tail.is_tail = True
 
-        # self.path = self.bfs(tuple(self.head.pos), tuple(self.apple.pos))
+        self.path = []
+        self.fake_snake = False
 
     def draw(self):
         self.apple.draw(APPLE_CLR)
         self.head.draw(HEAD_CLR)
         for sqr in self.squares[1:]:
-            sqr.draw()
+            if self.fake_snake:
+                sqr.draw((255, 0, 0))
+            else:
+                sqr.draw()
 
-    def set_direction(self, direction):
+    def go(self, direction):
         if direction == 'left':
             if not self.dir == [1, 0]:
                 self.dir = [-1, 0]
@@ -112,16 +116,16 @@ class Snake:
 
             for _ in keys:
                 if keys[pygame.K_LEFT]:
-                    self.set_direction('left')
+                    self.go('left')
 
                 elif keys[pygame.K_RIGHT]:
-                    self.set_direction('right')
+                    self.go('right')
 
                 elif keys[pygame.K_UP]:
-                    self.set_direction('up')
+                    self.go('up')
 
                 elif keys[pygame.K_DOWN]:
-                    self.set_direction('down')
+                    self.go('down')
 
     def move(self):
         for j, sqr in enumerate(self.squares):
@@ -133,7 +137,6 @@ class Snake:
                     self.turns.pop(p)
             else:
                 sqr.move(sqr.dir)
-        self.moves_without_eating += 1
 
     def add_square(self):
         self.squares[-1].is_tail = False
@@ -163,26 +166,27 @@ class Snake:
 
     def generate_apple(self):
         self.apple = Square([randrange(ROWS), randrange(ROWS)], self.surface, is_apple=True)
-        for sqr in self.squares:
-            if self.apple.pos == sqr.pos:
-                self.generate_apple()
+        if not self.is_position_free(self.apple.pos):
+            self.generate_apple()
 
     def eating_apple(self):
-        if self.head.pos == self.apple.pos:
+        if self.head.pos == self.apple.pos and not self.fake_snake:
             self.generate_apple()
             self.moves_without_eating = 0
-            self.set_path()
             return True
 
-    def go_to(self, position):
-        if self.head.pos[0] > position[0]:
-            self.set_direction('left')
-        if self.head.pos[0] < position[0]:
-            self.set_direction('right')
-        if self.head.pos[1] > position[1]:
-            self.set_direction('up')
-        if self.head.pos[1] < position[1]:
-            self.set_direction('down')
+    def set_direction(self, position):  # Set head direction to target position
+        if self.head.pos[0] - 1 == position[0]:
+            self.go('left')
+        if self.head.pos[0] + 1 == position[0]:
+            self.go('right')
+        if self.head.pos[1] - 1 == position[1]:
+            self.go('up')
+        if self.head.pos[1] + 1 == position[1]:
+            self.go('down')
+        if self.head.pos == position:
+            print('EQUALS')
+            self.go('stop')
 
     def is_position_free(self, position):
         if position[0] >= ROWS or position[0] < 0 or position[1] >= ROWS or position[1] < 0:
@@ -215,6 +219,8 @@ class Snake:
 
         start_node_found = False
         while not start_node_found:
+            if prev[p_node] is None:
+                return []
             p_node = prev[p_node]
             if p_node == s:
                 path.append(e)
@@ -224,29 +230,48 @@ class Snake:
         return []   # Path not available
 
     def set_path(self):
+        # Create virtual snake
         v_snake = Snake(self.surface)
         for i in range(len(self.squares) - len(v_snake.squares)):
             v_snake.add_square()
 
         for i, sqr in enumerate(v_snake.squares):
             sqr.pos = copy.deepcopy(self.squares[i].pos)
+            sqr.dir = copy.deepcopy(self.squares[i].dir)
+
+        v_snake.dir = copy.deepcopy(self.dir)
+        v_snake.turns = copy.deepcopy(self.turns)
         v_snake.apple.pos = copy.deepcopy(self.apple.pos)
+        v_snake.apple.is_apple = True
+        v_snake.fake_snake = True
 
-        # for p1, p2 in zip(self.squares, v_snake.squares):
-        #     print(p1.pos, p2.pos)
+        path = v_snake.bfs(tuple(v_snake.head.pos), tuple(v_snake.tail.pos))
 
-        self.path = v_snake.bfs(tuple(v_snake.head.pos), tuple(v_snake.apple.pos))
+        if path:
+            for pos in path:
+                v_snake.set_direction(pos)
+                v_snake.move()
 
-        # self.path = self.bfs(tuple(self.head.pos), tuple(self.apple.pos))
-        if not self.path:   # If path is empty (blocked)
-            # self.path = self.wander()
-            pass
+            # Check if path to tail is available
+
+
+        if not path:
+            # Wander
+            print('wander')
+            path = []
+            neighbors = get_neighbors(self.head.pos)
+            for n in neighbors:
+                if self.is_position_free(n):
+                    path.append(n)
+
+        v_snake.draw()
+        self.path = path
 
     def update(self):
         self.handle_events()
+
         self.set_path()
-        self.go_to(self.path[0])
-        # self.path.pop(0)
+        self.set_direction(self.path[0])
 
         self.draw()
         self.move()

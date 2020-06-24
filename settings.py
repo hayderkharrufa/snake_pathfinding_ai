@@ -35,3 +35,7 @@ def get_neighbors(position):
 
 #   Note here that each position is a tuple because python doesn't allow hashing lists
 adjacency_dict = {tuple(pos): get_neighbors(pos) for pos in grid}
+
+print(grid)
+
+# print(adjacency_dict[(20, 1)])
