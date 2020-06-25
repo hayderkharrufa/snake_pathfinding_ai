@@ -13,7 +13,7 @@ APPLE_CLR = (255, 255, 0)
 HEAD_CLR = (0, 150, 0)
 
 # Game Settings
-FPS = 30
+FPS = 60
 INITIAL_SNAKE_LENGTH = 3
 
 # Variables used in BFS algorithm
@@ -35,7 +35,3 @@ def get_neighbors(position):
 
 #   Note here that each position is a tuple because python doesn't allow hashing lists
 adjacency_dict = {tuple(pos): get_neighbors(pos) for pos in grid}
-
-print(grid)
-
-# print(adjacency_dict[(20, 1)])

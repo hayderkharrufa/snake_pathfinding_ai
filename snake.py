@@ -89,7 +89,7 @@ class Snake:
             else:
                 sqr.draw()
 
-    def go(self, direction):
+    def set_direction(self, direction):
         if direction == 'left':
             if not self.dir == [1, 0]:
                 self.dir = [-1, 0]
@@ -116,16 +116,16 @@ class Snake:
 
             for _ in keys:
                 if keys[pygame.K_LEFT]:
-                    self.go('left')
+                    self.set_direction('left')
 
                 elif keys[pygame.K_RIGHT]:
-                    self.go('right')
+                    self.set_direction('right')
 
                 elif keys[pygame.K_UP]:
-                    self.go('up')
+                    self.set_direction('up')
 
                 elif keys[pygame.K_DOWN]:
-                    self.go('down')
+                    self.set_direction('down')
 
     def move(self):
         for j, sqr in enumerate(self.squares):
@@ -175,18 +175,18 @@ class Snake:
             self.moves_without_eating = 0
             return True
 
-    def set_direction(self, position):  # Set head direction to target position
+    def go_to(self, position):  # Set head direction to target position
         if self.head.pos[0] - 1 == position[0]:
-            self.go('left')
+            self.set_direction('left')
         if self.head.pos[0] + 1 == position[0]:
-            self.go('right')
+            self.set_direction('right')
         if self.head.pos[1] - 1 == position[1]:
-            self.go('up')
+            self.set_direction('up')
         if self.head.pos[1] + 1 == position[1]:
-            self.go('down')
+            self.set_direction('down')
         if self.head.pos == position:
             print('EQUALS')
-            self.go('stop')
+            self.set_direction('stop')
 
     def is_position_free(self, position):
         if position[0] >= ROWS or position[0] < 0 or position[1] >= ROWS or position[1] < 0:
@@ -229,8 +229,7 @@ class Snake:
 
         return []   # Path not available
 
-    def set_path(self):
-        # Create virtual snake
+    def create_virtual_snake(self):
         v_snake = Snake(self.surface)
         for i in range(len(self.squares) - len(v_snake.squares)):
             v_snake.add_square()
@@ -245,33 +244,52 @@ class Snake:
         v_snake.apple.is_apple = True
         v_snake.fake_snake = True
 
-        path = v_snake.bfs(tuple(v_snake.head.pos), tuple(v_snake.tail.pos))
+        return v_snake
 
-        if path:
-            for pos in path:
-                v_snake.set_direction(pos)
+    def get_path_to_tail(self):
+        path_end_point = copy.deepcopy(self.squares[-1].pos)
+        self.squares.pop(-1)
+        path = self.bfs(tuple(self.head.pos), tuple(path_end_point))
+        self.add_square()
+        return path
+
+    def set_path(self):
+        v_snake = self.create_virtual_snake()
+
+        # Let the virtual snake check if path to apple is available
+        path_1 = self.bfs(tuple(self.head.pos), tuple(self.apple.pos))
+        path_2 = []
+
+        if path_1:
+            for pos in path_1:
+                v_snake.go_to(pos)
                 v_snake.move()
 
-            # Check if path to tail is available
+            path_2 = v_snake.get_path_to_tail()
 
+        # v_snake.draw()
 
-        if not path:
-            # Wander
-            print('wander')
-            path = []
-            neighbors = get_neighbors(self.head.pos)
-            for n in neighbors:
-                if self.is_position_free(n):
-                    path.append(n)
+        if path_2:
+            return path_1
 
-        v_snake.draw()
-        self.path = path
+        if (not path_1) or (not path_2):
+            print('follow tail')
+            return self.get_path_to_tail()
+
+        print('wander')
+        path = []
+        neighbors = get_neighbors(self.head.pos)
+        for n in neighbors:
+            if self.is_position_free(n):
+                path.append(n)
+
 
     def update(self):
         self.handle_events()
 
-        self.set_path()
-        self.set_direction(self.path[0])
+        self.path = self.set_path()
+        if self.path:
+            self.go_to(self.path[0])
 
         self.draw()
         self.move()
