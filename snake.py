@@ -253,6 +253,14 @@ class Snake:
         self.add_square()
         return path
 
+    def get_valid_head_neighbors(self):
+        valid_neighbors = []
+        neighbors = get_neighbors(tuple(self.head.pos))
+        for n in neighbors:
+            if self.is_position_free(n):
+                valid_neighbors.append(n)
+        return valid_neighbors
+
     def set_path(self):
         v_snake = self.create_virtual_snake()
 
@@ -265,6 +273,7 @@ class Snake:
                 v_snake.go_to(pos)
                 v_snake.move()
 
+            v_snake.add_square()    # Because it will eat an apple
             path_2 = v_snake.get_path_to_tail()
 
         # v_snake.draw()
@@ -282,7 +291,6 @@ class Snake:
         for n in neighbors:
             if self.is_position_free(n):
                 path.append(n)
-
 
     def update(self):
         self.handle_events()
