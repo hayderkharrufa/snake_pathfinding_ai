@@ -10,7 +10,7 @@ class Square:
         self.surface = surface
         self.is_apple = is_apple
         self.is_tail = False
-        self.dir = [-1, 0]      # [x, y] Direction
+        self.dir = [-1, 0]  # [x, y] Direction
 
         if self.is_apple:
             self.dir = [0, 0]
@@ -78,7 +78,7 @@ class Snake:
         self.tail.is_tail = True
 
         self.path = []
-        self.fake_snake = False
+        self.is_virtual_snake = False
         self.total_moves = 0
         self.won_game = False
 
@@ -86,8 +86,8 @@ class Snake:
         self.apple.draw(APPLE_CLR)
         self.head.draw(HEAD_CLR)
         for sqr in self.squares[1:]:
-            if self.fake_snake:
-                sqr.draw((255, 0, 0))
+            if self.is_virtual_snake:
+                sqr.draw(VIRTUAL_SNAKE_CLR)
             else:
                 sqr.draw()
 
@@ -143,7 +143,7 @@ class Snake:
 
     def add_square(self):
         self.squares[-1].is_tail = False
-        tail = self.squares[-1]     # Tail before adding new square
+        tail = self.squares[-1]  # Tail before adding new square
 
         direction = tail.dir
         if direction == [1, 0]:
@@ -156,7 +156,7 @@ class Snake:
             self.squares.append(Square([tail.pos[0], tail.pos[1] + 1], self.surface))
 
         self.squares[-1].dir = direction
-        self.squares[-1].is_tail = True     # Tail after adding new square
+        self.squares[-1].is_tail = True  # Tail after adding new square
 
     def reset(self):
         self.__init__(self.surface)
@@ -172,7 +172,7 @@ class Snake:
             self.generate_apple()
 
     def eating_apple(self):
-        if self.head.pos == self.apple.pos and not self.fake_snake and not self.won_game:
+        if self.head.pos == self.apple.pos and not self.is_virtual_snake and not self.won_game:
             self.generate_apple()
             self.moves_without_eating = 0
             self.score += 1
@@ -197,17 +197,18 @@ class Snake:
         return True
 
     # Breadth First Search Algorithm
-    def bfs(self, s, e):    # Find shortest path between (start_position, end_position)
-        q = []  # Queue
-        visited = {tuple(pos): False for pos in grid}
+    def bfs(self, s, e):  # Find shortest path between (start_position, end_position)
+        q = [s]  # Queue
+        visited = {tuple(pos): False for pos in GRID}
 
-        q.append(s)
         visited[s] = True
-        prev = {tuple(pos): None for pos in grid}   # The is used to find the parent node of each node to create a path
 
-        while q:    # While the queue is not empty
+        # Prev is used to find the parent node of each node to create a feasible path
+        prev = {tuple(pos): None for pos in GRID}
+
+        while q:  # While queue is not empty
             node = q.pop(0)
-            neighbors = adjacency_dict[node]
+            neighbors = ADJACENCY_DICT[node]
             for next_node in neighbors:
                 if self.is_position_free(next_node) and not visited[tuple(next_node)]:
                     q.append(tuple(next_node))
@@ -215,7 +216,7 @@ class Snake:
                     prev[tuple(next_node)] = node
 
         path = list()
-        p_node = e  # Starting from end, we will find the parent node of each node
+        p_node = e  # Starting from end node, we will find the parent node of each node
 
         start_node_found = False
         while not start_node_found:
@@ -227,7 +228,7 @@ class Snake:
                 return path
             path.insert(0, p_node)
 
-        return []   # Path not available
+        return []  # Path not available
 
     def create_virtual_snake(self):
         v_snake = Snake(self.surface)
@@ -242,49 +243,31 @@ class Snake:
         v_snake.turns = copy.deepcopy(self.turns)
         v_snake.apple.pos = copy.deepcopy(self.apple.pos)
         v_snake.apple.is_apple = True
-        v_snake.fake_snake = True
+        v_snake.is_virtual_snake = True
 
         return v_snake
 
     def get_path_to_tail(self):
-        path_end_point = copy.deepcopy(self.squares[-1].pos)
+        tail_pos = copy.deepcopy(self.squares[-1].pos)
         self.squares.pop(-1)
-        path = self.bfs(tuple(self.head.pos), tuple(path_end_point))
+        path = self.bfs(tuple(self.head.pos), tuple(tail_pos))
         self.add_square()
         return path
-
-    def get_longest_path_to_tail(self):
-        pass
 
     def get_available_neighbors(self, pos):
         valid_neighbors = []
         neighbors = get_neighbors(tuple(pos))
         for n in neighbors:
-            if self.is_position_free(n) and tuple(self.apple.pos) != tuple(n):
+            if self.is_position_free(n) and self.apple.pos != n:
                 valid_neighbors.append(tuple(n))
 
         return valid_neighbors
 
-    def lengthen_step(self, s, e):  # Make the path longer between the adjacent nodes (s and e)
-        node_1_neighbors = self.get_available_neighbors(s)
-        node_2_neighbors = self.get_available_neighbors(e)
-
-        node_1_neighbors.remove(e)
-        node_2_neighbors.remove(s)
-
-        for n1 in node_1_neighbors:
-            for n2 in node_2_neighbors:
-                if adjacent(n1, n2):
-                    path = s, n1, n2, e
-                    return path
-        return s, e
-
-    def wander(self):
+    def any_safe_move(self):
         neighbors = self.get_available_neighbors(self.head.pos)
+        path = []
         if neighbors:
-            path = list()
-            if neighbors:
-                path.append(neighbors[randrange(len(neighbors))])
+            path.append(neighbors[randrange(len(neighbors))])
             v_snake = self.create_virtual_snake()
             for move in path:
                 v_snake.go_to(move)
@@ -311,23 +294,20 @@ class Snake:
 
         # v_snake.draw()
 
-        if path_2:
-            # print('play safe move')
-            return path_1
+        if path_2:  # If there is a path between v_snake and it's tail
+            return path_1  # Choose BFS path to apple (Fastest and shortest path)
 
         if (not path_1) or (not path_2):
-            if self.wander():
-                # print('any possible safe move and make sure path to tail is available')
-                return self.wander()
+            if self.any_safe_move():
+                # Play any possible safe move and make sure path to tail is available
+                return self.any_safe_move()
 
-        if self.get_path_to_tail():
-            # print('follow shortest path to tail')
+        if self.get_path_to_tail():  # If path to tail is available
+            # Choose shortest path to tail
             return self.get_path_to_tail()
 
-        # print('no possible move, set the tail as path')
-        path = [self.squares[-1].pos]
-        # print('one step to tail', path)
-        return path
+        # Snake didn't find a path and will die
+        print('No possible path, snake is dying..')
 
     def update(self):
         self.handle_events()
@@ -340,20 +320,22 @@ class Snake:
         self.move()
         self.total_moves += 1
 
-        # print(self.moves_without_eating)
-
         if self.hitting_self() or self.head.hitting_wall():
-            print('Snake is dead, trying again..')
+            print("Snake is dead, trying again..")
             self.is_dead = True
             self.reset()
 
         if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:    # If snake win the game
             self.won_game = True
-            pygame.time.wait(1000 * 30)  # Wait for 30 seconds
 
-        if self.moves_without_eating == ROWS * ROWS * 50:
+            print("Snake won the game with {} moves, restarting after {} seconds"
+                  .format(self.total_moves, WAIT_SECONDS_AFTER_WIN))
+
+            pygame.time.wait(1000 * WAIT_SECONDS_AFTER_WIN)
+
+        if self.moves_without_eating == MAX_MOVES_WITHOUT_EATING:
             self.is_dead = True
-            print('Stuck in loop, trying again..')
+            print("Snake got stuck, trying again..")
             self.reset()
 
         if self.eating_apple():
