@@ -16,7 +16,7 @@ def draw_grid(surface):
         pygame.draw.line(surface, GRID_CLR, (0, y), (WIDTH, y))
 
 
-def play():
+def play_game():
     pygame.init()
     environ['SDL_VIDEO_CENTERED'] = '1'
     pygame.display.set_caption("Snake Game")
@@ -39,5 +39,4 @@ def play():
 
 
 if __name__ == '__main__':
-    for i in range(300):
-        print(play())
+    play_game()
