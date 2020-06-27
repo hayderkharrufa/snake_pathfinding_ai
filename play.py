@@ -31,12 +31,13 @@ def play():
 
         snake.update()
 
-        if snake.is_dead:
-            snake.reset()
+        if snake.won_game:
+            return snake.total_moves
 
         clock.tick(FPS)
         pygame.display.update()
 
 
 if __name__ == '__main__':
-    play()
+    for i in range(300):
+        print(play())

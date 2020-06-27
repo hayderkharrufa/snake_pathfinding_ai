@@ -1,7 +1,7 @@
 # Dimensions
 WIDTH = 600
 HEIGHT = 600
-ROWS = 20
+ROWS = 10
 SQUARE_SIZE = WIDTH // ROWS
 GAP_SIZE = 2  # Gap between adjacent squares
 

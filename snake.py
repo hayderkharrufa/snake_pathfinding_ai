@@ -1,6 +1,5 @@
 import pygame
 import copy
-import time
 from settings import *
 from random import randrange
 
@@ -81,6 +80,7 @@ class Snake:
         self.path = []
         self.fake_snake = False
         self.total_moves = 0
+        self.won_game = False
 
     def draw(self):
         self.apple.draw(APPLE_CLR)
@@ -172,7 +172,7 @@ class Snake:
             self.generate_apple()
 
     def eating_apple(self):
-        if self.head.pos == self.apple.pos and not self.fake_snake:
+        if self.head.pos == self.apple.pos and not self.fake_snake and not self.won_game:
             self.generate_apple()
             self.moves_without_eating = 0
             self.score += 1
@@ -187,9 +187,6 @@ class Snake:
             self.set_direction('up')
         if self.head.pos[1] + 1 == position[1]:
             self.set_direction('down')
-        if self.head.pos == position:
-            print('EQUALS')
-            self.set_direction('stop')
 
     def is_position_free(self, position):
         if position[0] >= ROWS or position[0] < 0 or position[1] >= ROWS or position[1] < 0:
@@ -295,11 +292,7 @@ class Snake:
             if v_snake.get_path_to_tail():
                 return path
             else:
-                print('tt')
-                if self.get_path_to_tail():
-                    return self.get_path_to_tail()
-                else:
-                    print('DEAD')
+                return self.get_path_to_tail()
 
     def set_path(self):
         v_snake = self.create_virtual_snake()
@@ -319,21 +312,21 @@ class Snake:
         # v_snake.draw()
 
         if path_2:
-            print('play safe move')
+            # print('play safe move')
             return path_1
 
         if (not path_1) or (not path_2):
             if self.wander():
-                print('any possible safe move and make sure path to tail is available')
+                # print('any possible safe move and make sure path to tail is available')
                 return self.wander()
 
         if self.get_path_to_tail():
-            print('follow shortest path to tail')
+            # print('follow shortest path to tail')
             return self.get_path_to_tail()
 
-        print('no possible move, set the tail as path')
+        # print('no possible move, set the tail as path')
         path = [self.squares[-1].pos]
-        print('one step to tail', path)
+        # print('one step to tail', path)
         return path
 
     def update(self):
@@ -347,24 +340,21 @@ class Snake:
         self.move()
         self.total_moves += 1
 
-        print(self.moves_without_eating)
+        # print(self.moves_without_eating)
 
         if self.hitting_self() or self.head.hitting_wall():
-            print('self.path', self.path)
-            print('cause of death', self.head.pos, self.squares[-1].pos, self.hitting_self(), self.head.hitting_wall())
+            print('Snake is dead, trying again..')
             self.is_dead = True
             self.reset()
 
-        if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:
-            print('you win, total moves: ', self.total_moves)
-            time.sleep(100000)
+        if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:    # If snake win the game
+            self.won_game = True
+            pygame.time.wait(1000 * 30)  # Wait for 30 seconds
 
-        if self.moves_without_eating == ROWS * ROWS * 30:
+        if self.moves_without_eating == ROWS * ROWS * 50:
             self.is_dead = True
-            print('reset')
+            print('Stuck in loop, trying again..')
             self.reset()
-
-
 
         if self.eating_apple():
             self.add_square()
