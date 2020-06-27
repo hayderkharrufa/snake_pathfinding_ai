@@ -263,6 +263,22 @@ class Snake:
 
         return valid_neighbors
 
+    def longest_path_to_tail(self):
+        neighbors = self.get_available_neighbors(self.head.pos)
+        path = []
+        if neighbors:
+            dis = 0
+            for n in neighbors:
+                if distance(n, self.squares[-1].pos) > dis:
+                    v_snake = self.create_virtual_snake()
+                    v_snake.go_to(n)
+                    v_snake.move()
+                    if v_snake.get_path_to_tail():
+                        path.append(n)
+                        dis = distance(n, self.squares[-1].pos)
+            if path:
+                return [path[-1]]
+
     def any_safe_move(self):
         neighbors = self.get_available_neighbors(self.head.pos)
         path = []
@@ -297,17 +313,21 @@ class Snake:
         if path_2:  # If there is a path between v_snake and it's tail
             return path_1  # Choose BFS path to apple (Fastest and shortest path)
 
-        if (not path_1) or (not path_2):
-            if self.any_safe_move():
-                # Play any possible safe move and make sure path to tail is available
-                return self.any_safe_move()
+        # If path_1 or path_2 not available
+        if self.longest_path_to_tail():
+            # Choose longest path to tail
+            return self.longest_path_to_tail()
+
+        # Play any possible safe move and make sure path to tail is available
+        if self.any_safe_move():
+            return self.any_safe_move()
 
         if self.get_path_to_tail():  # If path to tail is available
             # Choose shortest path to tail
             return self.get_path_to_tail()
 
         # Snake didn't find a path and will die
-        print('No possible path, snake is dying..')
+        # print('No possible path, snake is dying..')
 
     def update(self):
         self.handle_events()
@@ -321,21 +341,21 @@ class Snake:
         self.total_moves += 1
 
         if self.hitting_self() or self.head.hitting_wall():
-            print("Snake is dead, trying again..")
+            # print("Snake is dead, trying again..")
             self.is_dead = True
             self.reset()
 
-        if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:    # If snake win the game
+        if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:    # If snake wins the game
             self.won_game = True
 
-            print("Snake won the game with {} moves, restarting after {} seconds"
-                  .format(self.total_moves, WAIT_SECONDS_AFTER_WIN))
+            # print("Snake won the game with {} moves, restarting after {} seconds"
+            #       .format(self.total_moves, WAIT_SECONDS_AFTER_WIN))
 
             pygame.time.wait(1000 * WAIT_SECONDS_AFTER_WIN)
 
         if self.moves_without_eating == MAX_MOVES_WITHOUT_EATING:
             self.is_dead = True
-            print("Snake got stuck, trying again..")
+            # print("Snake got stuck, trying again..")
             self.reset()
 
         if self.eating_apple():

@@ -1,7 +1,7 @@
 # Dimensions
 WIDTH = 600
 HEIGHT = 600
-ROWS = 20
+ROWS = 15
 SQUARE_SIZE = WIDTH // ROWS
 GAP_SIZE = 2  # Gap between adjacent squares
 
@@ -14,9 +14,9 @@ HEAD_CLR = (0, 150, 0)
 VIRTUAL_SNAKE_CLR = (255, 0, 0)
 
 # Game Settings
-FPS = 60  # Frames per second
+FPS = 200  # Frames per second
 INITIAL_SNAKE_LENGTH = 3
-WAIT_SECONDS_AFTER_WIN = 30  # If snake wins the game, wait for this amount of seconds before restarting
+WAIT_SECONDS_AFTER_WIN = 1  # If snake wins the game, wait for this amount of seconds before restarting
 MAX_MOVES_WITHOUT_EATING = ROWS * ROWS * ROWS * 2  # Snake will die after this amount of moves without eating apple
 
 # Variables used in BFS algorithm
@@ -33,6 +33,12 @@ def get_neighbors(position):
         if pos in GRID:
             in_grid_neighbors.append(pos)
     return in_grid_neighbors
+
+
+def distance(pos1, pos2):
+    x1, x2 = pos1[0], pos2[0]
+    y1, y2 = pos1[1], pos2[1]
+    return abs(x2 - x1) + abs(y2 - y1)
 
 
 # Each position is a tuple because python doesn't allow hashing lists
