@@ -1,5 +1,6 @@
 import pygame
 import copy
+import time
 from settings import *
 from random import randrange
 
@@ -79,6 +80,7 @@ class Snake:
 
         self.path = []
         self.fake_snake = False
+        self.total_moves = 0
 
     def draw(self):
         self.apple.draw(APPLE_CLR)
@@ -137,6 +139,7 @@ class Snake:
                     self.turns.pop(p)
             else:
                 sqr.move(sqr.dir)
+        self.moves_without_eating += 1
 
     def add_square(self):
         self.squares[-1].is_tail = False
@@ -154,7 +157,6 @@ class Snake:
 
         self.squares[-1].dir = direction
         self.squares[-1].is_tail = True     # Tail after adding new square
-        self.score += 1
 
     def reset(self):
         self.__init__(self.surface)
@@ -173,6 +175,7 @@ class Snake:
         if self.head.pos == self.apple.pos and not self.fake_snake:
             self.generate_apple()
             self.moves_without_eating = 0
+            self.score += 1
             return True
 
     def go_to(self, position):  # Set head direction to target position
@@ -253,13 +256,50 @@ class Snake:
         self.add_square()
         return path
 
-    def get_valid_head_neighbors(self):
+    def get_longest_path_to_tail(self):
+        pass
+
+    def get_available_neighbors(self, pos):
         valid_neighbors = []
-        neighbors = get_neighbors(tuple(self.head.pos))
+        neighbors = get_neighbors(tuple(pos))
         for n in neighbors:
-            if self.is_position_free(n):
-                valid_neighbors.append(n)
+            if self.is_position_free(n) and tuple(self.apple.pos) != tuple(n):
+                valid_neighbors.append(tuple(n))
+
         return valid_neighbors
+
+    def lengthen_step(self, s, e):  # Make the path longer between the adjacent nodes (s and e)
+        node_1_neighbors = self.get_available_neighbors(s)
+        node_2_neighbors = self.get_available_neighbors(e)
+
+        node_1_neighbors.remove(e)
+        node_2_neighbors.remove(s)
+
+        for n1 in node_1_neighbors:
+            for n2 in node_2_neighbors:
+                if adjacent(n1, n2):
+                    path = s, n1, n2, e
+                    return path
+        return s, e
+
+    def wander(self):
+        neighbors = self.get_available_neighbors(self.head.pos)
+        if neighbors:
+            path = list()
+            if neighbors:
+                path.append(neighbors[randrange(len(neighbors))])
+            v_snake = self.create_virtual_snake()
+            for move in path:
+                v_snake.go_to(move)
+                v_snake.move()
+            if v_snake.get_path_to_tail():
+                return path
+            else:
+                print('tt')
+                if self.get_path_to_tail():
+                    return self.get_path_to_tail()
+                else:
+                    print('DEAD')
 
     def set_path(self):
         v_snake = self.create_virtual_snake()
@@ -279,18 +319,22 @@ class Snake:
         # v_snake.draw()
 
         if path_2:
+            print('play safe move')
             return path_1
 
         if (not path_1) or (not path_2):
-            print('follow tail')
+            if self.wander():
+                print('any possible safe move and make sure path to tail is available')
+                return self.wander()
+
+        if self.get_path_to_tail():
+            print('follow shortest path to tail')
             return self.get_path_to_tail()
 
-        print('wander')
-        path = []
-        neighbors = get_neighbors(self.head.pos)
-        for n in neighbors:
-            if self.is_position_free(n):
-                path.append(n)
+        print('no possible move, set the tail as path')
+        path = [self.squares[-1].pos]
+        print('one step to tail', path)
+        return path
 
     def update(self):
         self.handle_events()
@@ -301,9 +345,26 @@ class Snake:
 
         self.draw()
         self.move()
+        self.total_moves += 1
+
+        print(self.moves_without_eating)
 
         if self.hitting_self() or self.head.hitting_wall():
+            print('self.path', self.path)
+            print('cause of death', self.head.pos, self.squares[-1].pos, self.hitting_self(), self.head.hitting_wall())
             self.is_dead = True
+            self.reset()
+
+        if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:
+            print('you win, total moves: ', self.total_moves)
+            time.sleep(100000)
+
+        if self.moves_without_eating == ROWS * ROWS * 30:
+            self.is_dead = True
+            print('reset')
+            self.reset()
+
+
 
         if self.eating_apple():
             self.add_square()

@@ -3,7 +3,7 @@ WIDTH = 600
 HEIGHT = 600
 ROWS = 20
 SQUARE_SIZE = WIDTH // ROWS
-GAP_SIZE = 1    # Gap between adjacent squares
+GAP_SIZE = 2  # Gap between adjacent squares
 
 # Colors
 SCREEN_CLR = (15, 15, 15)
@@ -13,7 +13,7 @@ APPLE_CLR = (255, 255, 0)
 HEAD_CLR = (0, 150, 0)
 
 # Game Settings
-FPS = 60
+FPS = 1000
 INITIAL_SNAKE_LENGTH = 3
 
 # Variables used in BFS algorithm
@@ -33,5 +33,9 @@ def get_neighbors(position):
     return in_grid_neighbors
 
 
-#   Note here that each position is a tuple because python doesn't allow hashing lists
+def adjacent(position_1, position_2):
+    return list(position_1) in get_neighbors(position_2)
+
+
+# Note here that each position is a tuple because python doesn't allow hashing lists
 adjacency_dict = {tuple(pos): get_neighbors(pos) for pos in grid}
