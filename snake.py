@@ -351,7 +351,6 @@ class Snake:
             pygame.time.wait(1000 * WAIT_SECONDS_AFTER_WIN)
             print("Snake won the game with {} moves"
                   .format(self.total_moves))
-            return self.total_moves
 
         self.path = self.set_path()
         if self.path:
