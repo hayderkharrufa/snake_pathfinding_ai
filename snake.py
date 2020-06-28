@@ -1,6 +1,6 @@
 import pygame
-import copy
 from settings import *
+from copy import deepcopy
 from random import randrange
 
 
@@ -114,6 +114,7 @@ class Snake:
             if event.type == pygame.QUIT:
                 pygame.quit()
 
+            # Set snake direction using keyboard
             keys = pygame.key.get_pressed()
 
             for _ in keys:
@@ -230,25 +231,25 @@ class Snake:
 
         return []  # Path not available
 
-    def create_virtual_snake(self):
+    def create_virtual_snake(self):  # Creates a copy of snake (same size, same position, etc..)
         v_snake = Snake(self.surface)
         for i in range(len(self.squares) - len(v_snake.squares)):
             v_snake.add_square()
 
         for i, sqr in enumerate(v_snake.squares):
-            sqr.pos = copy.deepcopy(self.squares[i].pos)
-            sqr.dir = copy.deepcopy(self.squares[i].dir)
+            sqr.pos = deepcopy(self.squares[i].pos)
+            sqr.dir = deepcopy(self.squares[i].dir)
 
-        v_snake.dir = copy.deepcopy(self.dir)
-        v_snake.turns = copy.deepcopy(self.turns)
-        v_snake.apple.pos = copy.deepcopy(self.apple.pos)
+        v_snake.dir = deepcopy(self.dir)
+        v_snake.turns = deepcopy(self.turns)
+        v_snake.apple.pos = deepcopy(self.apple.pos)
         v_snake.apple.is_apple = True
         v_snake.is_virtual_snake = True
 
         return v_snake
 
     def get_path_to_tail(self):
-        tail_pos = copy.deepcopy(self.squares[-1].pos)
+        tail_pos = deepcopy(self.squares[-1].pos)
         self.squares.pop(-1)
         path = self.bfs(tuple(self.head.pos), tuple(tail_pos))
         self.add_square()
@@ -260,14 +261,13 @@ class Snake:
         for n in neighbors:
             if self.is_position_free(n) and self.apple.pos != n:
                 valid_neighbors.append(tuple(n))
-
         return valid_neighbors
 
     def longest_path_to_tail(self):
         neighbors = self.get_available_neighbors(self.head.pos)
         path = []
         if neighbors:
-            dis = 0
+            dis = -9999
             for n in neighbors:
                 if distance(n, self.squares[-1].pos) > dis:
                     v_snake = self.create_virtual_snake()
@@ -299,7 +299,7 @@ class Snake:
         v_snake = self.create_virtual_snake()
 
         # Let the virtual snake check if path to apple is available
-        path_1 = self.bfs(tuple(self.head.pos), tuple(self.apple.pos))
+        path_1 = v_snake.bfs(tuple(v_snake.head.pos), tuple(v_snake.apple.pos))
 
         # This will be the path to virtual snake tail after it follows path_1
         path_2 = []
@@ -309,7 +309,7 @@ class Snake:
                 v_snake.go_to(pos)
                 v_snake.move()
 
-            v_snake.add_square()    # Because it will eat an apple
+            v_snake.add_square()  # Because it will eat an apple
             path_2 = v_snake.get_path_to_tail()
 
         # v_snake.draw()
@@ -318,9 +318,9 @@ class Snake:
             return path_1  # Choose BFS path to apple (Fastest and shortest path)
 
         # If path_1 or path_2 not available, test these 3 conditions:
-        # 1- Make sure that the longest path to tail is available
-        # 2- If score is even, choose longest_path_to_tail() to follow the tail, if odd use any_safe_move()
-        # 3- Change the follow tail method if the snake gets stuck in a loop
+            # 1- Make sure that the longest path to tail is available
+            # 2- If score is even, choose longest_path_to_tail() to follow the tail, if odd use any_safe_move()
+            # 3- Change the follow tail method if the snake gets stuck in a loop
         if self.longest_path_to_tail() and\
                 self.score % 2 == 0 and\
                 self.moves_without_eating < MAX_MOVES_WITHOUT_EATING / 2:
@@ -337,15 +337,21 @@ class Snake:
             # Choose shortest path to tail
             return self.get_path_to_tail()
 
-        # Snake didn't find a path and will die
-        # print('No possible path, snake is dying..')
+        # Snake couldn't find a path and will probably die
+        print('No available path, snake in danger!  1')
+        if self.get_available_neighbors(self.head.pos):
+            print('No available path, snake in danger!')
+            return self.get_available_neighbors(self.head.pos)
 
     def update(self):
         self.handle_events()
 
-        if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:    # If snake wins the game
+        if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:  # If snake wins the game
             self.won_game = True
             pygame.time.wait(1000 * WAIT_SECONDS_AFTER_WIN)
+            print("Snake won the game with {} moves"
+                  .format(self.total_moves))
+            return self.total_moves
 
         self.path = self.set_path()
         if self.path:
@@ -356,17 +362,13 @@ class Snake:
         self.total_moves += 1
 
         if self.hitting_self() or self.head.hitting_wall():
-            # print("Snake is dead, trying again..")
+            print("Snake is dead, trying again..")
             self.is_dead = True
             self.reset()
 
-            # print("Snake won the game with {} moves, restarting after {} seconds"
-            #       .format(self.total_moves, WAIT_SECONDS_AFTER_WIN))
-
-        # print(self.total_moves, self.score)
         if self.moves_without_eating == MAX_MOVES_WITHOUT_EATING:
             self.is_dead = True
-            # print("Snake got stuck, trying again..")
+            print("Snake got stuck, trying again..")
             self.reset()
 
         if self.eating_apple():

@@ -1,7 +1,7 @@
 # Dimensions
-WIDTH = 600
-HEIGHT = 600
-ROWS = 16
+WIDTH = 612
+HEIGHT = 612
+ROWS = 17
 SQUARE_SIZE = WIDTH // ROWS
 GAP_SIZE = 2  # Gap between adjacent squares
 
@@ -14,7 +14,7 @@ HEAD_CLR = (0, 150, 0)
 VIRTUAL_SNAKE_CLR = (255, 0, 0)
 
 # Game Settings
-FPS = 200  # Frames per second
+FPS = 500  # Frames per second
 INITIAL_SNAKE_LENGTH = 3
 WAIT_SECONDS_AFTER_WIN = 3  # If snake wins the game, wait for this amount of seconds before restarting
 MAX_MOVES_WITHOUT_EATING = ROWS * ROWS * ROWS * 2  # Snake will die after this amount of moves without eating apple
