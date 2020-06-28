@@ -273,6 +273,8 @@ class Snake:
                     v_snake = self.create_virtual_snake()
                     v_snake.go_to(n)
                     v_snake.move()
+                    if v_snake.eating_apple():
+                        v_snake.add_square()
                     if v_snake.get_path_to_tail():
                         path.append(n)
                         dis = distance(n, self.squares[-1].pos)
@@ -298,6 +300,8 @@ class Snake:
 
         # Let the virtual snake check if path to apple is available
         path_1 = self.bfs(tuple(self.head.pos), tuple(self.apple.pos))
+
+        # This will be the path to virtual snake tail after it follows path_1
         path_2 = []
 
         if path_1:
@@ -313,8 +317,14 @@ class Snake:
         if path_2:  # If there is a path between v_snake and it's tail
             return path_1  # Choose BFS path to apple (Fastest and shortest path)
 
-        # If path_1 or path_2 not available
-        if self.longest_path_to_tail():
+        # If path_1 or path_2 not available, test these 3 conditions:
+        # 1- Make sure that the longest path to tail is available
+        # 2- If score is even, choose longest_path_to_tail() to follow the tail, if odd use any_safe_move()
+        # 3- Change the follow tail method if the snake gets stuck in a loop
+        if self.longest_path_to_tail() and\
+                self.score % 2 == 0 and\
+                self.moves_without_eating < MAX_MOVES_WITHOUT_EATING / 2:
+
             # Choose longest path to tail
             return self.longest_path_to_tail()
 
@@ -322,7 +332,8 @@ class Snake:
         if self.any_safe_move():
             return self.any_safe_move()
 
-        if self.get_path_to_tail():  # If path to tail is available
+        # If path to tail is available
+        if self.get_path_to_tail():
             # Choose shortest path to tail
             return self.get_path_to_tail()
 
@@ -331,6 +342,10 @@ class Snake:
 
     def update(self):
         self.handle_events()
+
+        if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:    # If snake wins the game
+            self.won_game = True
+            pygame.time.wait(1000 * WAIT_SECONDS_AFTER_WIN)
 
         self.path = self.set_path()
         if self.path:
@@ -345,14 +360,10 @@ class Snake:
             self.is_dead = True
             self.reset()
 
-        if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:    # If snake wins the game
-            self.won_game = True
-
             # print("Snake won the game with {} moves, restarting after {} seconds"
             #       .format(self.total_moves, WAIT_SECONDS_AFTER_WIN))
 
-            pygame.time.wait(1000 * WAIT_SECONDS_AFTER_WIN)
-
+        # print(self.total_moves, self.score)
         if self.moves_without_eating == MAX_MOVES_WITHOUT_EATING:
             self.is_dead = True
             # print("Snake got stuck, trying again..")
