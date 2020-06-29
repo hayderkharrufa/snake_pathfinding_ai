@@ -296,6 +296,13 @@ class Snake:
                 return self.get_path_to_tail()
 
     def set_path(self):
+        # If there is only 1 apple left for snake to win and it's adjacent to head
+        if self.score == SNAKE_MAX_LENGTH - 1 and self.apple.pos in get_neighbors(self.head.pos):
+            winning_path = [tuple(self.apple.pos)]
+            # print('Snake is about to win..')
+            print('الثعبان على وشك الفوز..')
+            return winning_path
+
         v_snake = self.create_virtual_snake()
 
         # Let the virtual snake check if path to apple is available
@@ -315,6 +322,7 @@ class Snake:
         # v_snake.draw()
 
         if path_2:  # If there is a path between v_snake and it's tail
+            print('اتبع الطريق الأقصر إلى التفاحة')
             return path_1  # Choose BFS path to apple (Fastest and shortest path)
 
         # If path_1 or path_2 not available, test these 3 conditions:
@@ -326,31 +334,28 @@ class Snake:
                 self.moves_without_eating < MAX_MOVES_WITHOUT_EATING / 2:
 
             # Choose longest path to tail
+            print('اتبع الطريق الأبعد إلى الذيل')
             return self.longest_path_to_tail()
 
         # Play any possible safe move and make sure path to tail is available
         if self.any_safe_move():
+            print('اتبع الذيل بحركات عشوائية')
             return self.any_safe_move()
 
         # If path to tail is available
         if self.get_path_to_tail():
             # Choose shortest path to tail
+            print('اتبع الطريق الأقصر إلى الذيل')
             return self.get_path_to_tail()
 
         # Snake couldn't find a path and will probably die
-        print('No available path, snake in danger!  1')
+        # print('No available path, snake in danger!  1')
         if self.get_available_neighbors(self.head.pos):
-            print('No available path, snake in danger!')
+            print('test')
             return self.get_available_neighbors(self.head.pos)
 
     def update(self):
         self.handle_events()
-
-        if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:  # If snake wins the game
-            self.won_game = True
-            pygame.time.wait(1000 * WAIT_SECONDS_AFTER_WIN)
-            print("Snake won the game with {} moves"
-                  .format(self.total_moves))
 
         self.path = self.set_path()
         if self.path:
@@ -358,9 +363,22 @@ class Snake:
 
         self.draw()
         self.move()
+
+        if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:  # If snake wins the game
+            self.won_game = True
+
+            # print("Snake won the game after {} move"
+            #       .format(self.total_moves))
+            print("فاز الثعبان باللعبة بعد {} خطوة"
+                  .format(self.total_moves))
+
+            pygame.time.wait(1000 * WAIT_SECONDS_AFTER_WIN)
+            return 1
+
         self.total_moves += 1
 
         if self.hitting_self() or self.head.hitting_wall():
+            # print("Snake is dead, trying again..")
             print("Snake is dead, trying again..")
             self.is_dead = True
             self.reset()
