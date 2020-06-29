@@ -16,7 +16,7 @@ VIRTUAL_SNAKE_CLR = (255, 0, 0)
 # Game Settings
 FPS = 30  # Frames per second
 INITIAL_SNAKE_LENGTH = 3
-WAIT_SECONDS_AFTER_WIN = 10  # If snake wins the game, wait for this amount of seconds before restarting
+WAIT_SECONDS_AFTER_WIN = 15  # If snake wins the game, wait for this amount of seconds before restarting
 MAX_MOVES_WITHOUT_EATING = ROWS * ROWS * ROWS * 2  # Snake will die after this amount of moves without eating apple
 SNAKE_MAX_LENGTH = ROWS * ROWS - INITIAL_SNAKE_LENGTH  # Max number of apples snake can eat
 
