@@ -3,7 +3,7 @@ from os import environ
 
 
 def draw_screen(surface):
-    surface.fill(SCREEN_CLR)
+    surface.fill(SURFACE_CLR)
 
 
 def draw_grid(surface):
@@ -20,19 +20,16 @@ def play_game():
     pygame.init()
     environ['SDL_VIDEO_CENTERED'] = '1'
     pygame.display.set_caption("Snake Game")
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    game_surface = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
-    snake = Snake(screen)
+    snake = Snake(game_surface)
 
     mainloop = True
     while mainloop:
-        draw_screen(screen)
-        draw_grid(screen)
+        draw_screen(game_surface)
+        draw_grid(game_surface)
 
         snake.update()
-
-        if snake.won_game:
-            return snake.total_moves
 
         clock.tick(FPS)
         pygame.display.update()
