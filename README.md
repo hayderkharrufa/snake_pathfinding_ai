@@ -1,5 +1,5 @@
 ##  Snake Pathfinding AI
-AI plays snake game using BFS (Breadth-First Search) algorithm.
+AI plays snake game using BFS (Breadth-First Search) algorithm.<br />
 Check out this **[YouTube video](https://youtu.be/Dnx6bE4Nwyo) (in Arabic)** to see how I built this project.
 
 ![gameplay](https://user-images.githubusercontent.com/38482276/87240274-cae19380-c420-11ea-8193-bddab2ef379d.gif)
@@ -35,4 +35,4 @@ For more details, read the comments in .py files.
 
 ### License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
