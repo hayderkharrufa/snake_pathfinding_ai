@@ -22,10 +22,10 @@ pip install pygame
 
 ### How it works?
 
-1. The snake will use BFS algorithm to find the shortest path between its head and the apple (let's call it path1). If path1 is not available, then go to step 4.
-2. Create a virtual snake identical to the original snake and make follow path1.
-3. After the virtual snake reaches the apple, check if the path between the virtual snake's head and its tail is available (let's call it path2), if so then make the original snake follow path1.
-4. If path1 or path2 are not available, make the original snake follow its tail.
+1. The snake will use BFS algorithm to find the shortest path between its head and the apple (let's call it path_1). If path1 is not available, then go to step 4.
+2. Create a virtual snake identical to the original snake and make it follow path_1.
+3. After the virtual snake reaches the apple, check if the path between the virtual snake's head and its tail is available (let's call it path_2), if so, then make the original snake follow path_1.
+4. If path_1 or path_2 are not available, make the original snake follow its tail.
 
 For more details, read the comments in .py files.
 
