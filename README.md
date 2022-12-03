@@ -4,7 +4,7 @@ Check out this **[YouTube video](https://youtu.be/UIKthUWZ8dw) (in Arabic)** to 
 
 ![gameplay](https://user-images.githubusercontent.com/38482276/87240274-cae19380-c420-11ea-8193-bddab2ef379d.gif)
 
-### How to run?
+### How to run
 
 - Install  [Python 3](https://www.python.org).
 - Install these modules:
@@ -20,7 +20,7 @@ pip install pygame
  - **snake.py** : contains Snake and Square classes.
  - **play.py** : contains code for running the project.
 
-### How it works?
+### How it works
 
 1. The snake will use BFS algorithm to find the shortest path between its head and the apple (let's call it path_1). If path1 is not available, then go to step 4.
 2. Create a virtual snake identical to the original snake and make it follow path_1.
