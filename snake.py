@@ -117,18 +117,17 @@ class Snake:
             # Set snake direction using keyboard
             keys = pygame.key.get_pressed()
 
-            for _ in keys:
-                if keys[pygame.K_LEFT]:
-                    self.set_direction('left')
+            if keys[pygame.K_LEFT]:
+                self.set_direction('left')
 
-                elif keys[pygame.K_RIGHT]:
-                    self.set_direction('right')
+            elif keys[pygame.K_RIGHT]:
+                self.set_direction('right')
 
-                elif keys[pygame.K_UP]:
-                    self.set_direction('up')
+            elif keys[pygame.K_UP]:
+                self.set_direction('up')
 
-                elif keys[pygame.K_DOWN]:
-                    self.set_direction('down')
+            elif keys[pygame.K_DOWN]:
+                self.set_direction('down')
 
     def move(self):
         for j, sqr in enumerate(self.squares):
